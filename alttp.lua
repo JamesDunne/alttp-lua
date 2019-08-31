@@ -14,6 +14,7 @@ local screen, dungeon;
 local y = {};
 local x = {};
 local t = {};
+local state = {};
 
 while true do
     screen = mainmemory.read_u16_le(0x008A);
@@ -22,16 +23,17 @@ while true do
     yoffs = mainmemory.read_s16_le(0x00E8);
     xoffs = mainmemory.read_s16_le(0x00E2);
 
-    gui.drawText(0, 0, string.format("%04x %04x  x=%04x,y=%04x", screen, dungeon, xoffs, yoffs));
+    gui.drawText(0, 0, string.format("%04x %04x  x=%04x,y=%04x", screen, dungeon, xoffs, yoffs), null, 0x3F000000, 11);
 
     for i = 1, 16 do
         y[i] = bit.bor(mainmemory.read_u8(0x0D00+i-1), bit.lshift(mainmemory.read_u8(0x0D20+i-1), 8));
         x[i] = bit.bor(mainmemory.read_u8(0x0D10+i-1), bit.lshift(mainmemory.read_u8(0x0D30+i-1), 8));
+        state[i] = mainmemory.read_u8(0x0DD0+i-1);
         t[i] = mainmemory.read_u8(0x0E20+i-1);
 
-        if t[i] ~= 0 then
-            gui.drawText(x[i]-xoffs, y[i]-yoffs, string.format("%02x", t[i]));
-            gui.drawText(x[i]-xoffs+4, y[i]-yoffs-10, string.format("%x", i-1), null, null, 10);
+        if t[i] ~= 0 and state[i] ~= 0 then
+            gui.drawText(x[i]-xoffs, y[i]-yoffs, string.format("%02x", t[i]), null, 0x3F000000, 11);
+            gui.drawText(x[i]-xoffs+3, y[i]-yoffs-10, string.format("%x", i-1), null, 0x3F000000, 11);
         end
     end
 
